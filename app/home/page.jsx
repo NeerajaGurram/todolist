@@ -48,7 +48,7 @@ export default function Home() {
 
   return (
     <div className="container max-w-screen mx-auto p-4">
-      <div className="flex justify-between items-center mb-4 mx-20">
+      <div className="flex justify-between items-center mb-4 lg:mx-20">
         <h1 className="text-2xl font-bold">Tasks</h1>
         <Link href="/add-task" className="bg-blue-500 text-white px-4 py-2 rounded">
           Add Task
