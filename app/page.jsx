@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ToastContainer, toast } from 'react-toastify'; // Import the toast functions
-import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -16,12 +16,14 @@ export default function AuthPage() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
-    toast.info('Loading...', { autoClose: false }); // Show loading toast
 
     const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/signin';
     const payload = isSignUp
       ? { name, email, password }
       : { email, password };
+
+    // Show a waiting toast
+    const toastId = toast.loading('Processing...');
 
     try {
       const response = await fetch(endpoint, {
@@ -34,21 +36,41 @@ export default function AuthPage() {
 
       if (!response.ok) {
         setError(data.error || 'Authentication failed');
-        toast.error(data.error || 'Authentication failed');
+        toast.update(toastId, {
+          render: data.error || 'Authentication failed',
+          type: 'error',
+          isLoading: false,
+          autoClose: 5000,
+        });
         return;
       }
 
       if (isSignUp) {
+        toast.update(toastId, {
+          render: 'Sign up successful! Redirecting to Sign In...',
+          type: 'success',
+          isLoading: false,
+          autoClose: 5000,
+        });
         setIsSignUp(false); // Redirect to Sign In after signup
-        toast.success('Signup successful! Please sign in.', { autoClose: 3000 });
       } else {
         localStorage.setItem('token', data.token);
-        toast.success('Signed in successfully!', { autoClose: 3000 });
+        toast.update(toastId, {
+          render: 'Sign in successful! Redirecting...',
+          type: 'success',
+          isLoading: false,
+          autoClose: 5000,
+        });
         router.push('/home');
       }
     } catch (err) {
-      setError('An error occurred.');
-      toast.error('An error occurred, please try again!');
+      setError('An error occurred. Please try again.');
+      toast.update(toastId, {
+        render: 'An error occurred. Please try again.',
+        type: 'error',
+        isLoading: false,
+        autoClose: 5000,
+      });
     }
   };
 
@@ -98,9 +120,7 @@ export default function AuthPage() {
           {isSignUp ? 'Sign In' : 'Sign Up'}
         </button>
       </p>
-
-      
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </div>
   );
 }
