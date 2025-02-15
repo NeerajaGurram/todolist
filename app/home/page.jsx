@@ -10,6 +10,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortCriteria, setSortCriteria] = useState('recent');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const hasReloaded = sessionStorage.getItem('hasReloaded');
@@ -21,12 +22,19 @@ export default function Home() {
     }
 
     const fetchTasks = async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/tasks', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setTasks(data);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/tasks', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        setTasks(data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        toast.error('Failed to fetch tasks.');
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
     };
 
     fetchTasks();
@@ -49,7 +57,6 @@ export default function Home() {
     });
   };
 
-  // Function to toggle task status
   const toggleTaskStatus = async (task) => {
     const token = localStorage.getItem('token');
     const updatedStatus = task.status === 'completed' ? 'pending' : 'completed';
@@ -89,17 +96,14 @@ export default function Home() {
 
   // Sort tasks based on the selected criteria
   const sortedTasks = filteredTasks.sort((a, b) => {
-    // Default sorting: pending tasks at the top, completed tasks at the bottom
-    if (a.status === 'pending' && b.status === 'completed') return -1; // a comes first
-    if (a.status === 'completed' && b.status === 'pending') return 1; // b comes first
+    if (a.status === 'pending' && b.status === 'completed') return -1;
+    if (a.status === 'completed' && b.status === 'pending') return 1;
 
-    // If both tasks have the same status, sort by the selected criteria
     if (sortCriteria === 'title') {
       return a.title.localeCompare(b.title);
     } else if (sortCriteria === 'date') {
-      return new Date(b.updatedAt) - new Date(a.updatedAt); // Most recent first
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
     } else if (sortCriteria === 'status') {
-      // If sorting by status, pending comes before completed
       if (a.status === 'completed' && b.status !== 'completed') return 1;
       if (a.status !== 'completed' && b.status === 'completed') return -1;
       return 0;
@@ -110,7 +114,6 @@ export default function Home() {
 
   return (
     <div className="container max-w-screen mx-auto p-4">
-      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -165,53 +168,59 @@ export default function Home() {
         </select>
       </div>
 
-   
-{/* Task List */}
-<ul>
-  {sortedTasks.length > 0 ? (
-    sortedTasks.map((task) => (
-      <li
-        key={task._id}
-        className={`p-4 mb-2 rounded lg:mx-20 ${
-          task.status === 'completed' ? 'bg-green-100' : 'bg-yellow-100'
-        }`}
-      >
-        <div className="flex items-center justify-start space-x-5">
-          <input
-            type="checkbox"
-            checked={task.status === 'completed'}
-            onChange={() => toggleTaskStatus(task)}
-            className="ml-4 h-5 w-5"
-          />
-          <div>
-            <h2 className="font-bold">{task.title}</h2>
-            <p>{task.description}</p>
-            <p>Status: {task.status}</p>
-            <p className="text-gray-500">{new Date(task.updatedAt).toLocaleString()}</p>
-          </div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="flex justify-center items-center p-4 lg:mx-20">
+          <p className="text-gray-500">Loading tasks...</p>
         </div>
-        <div className="mt-2 ml-14">
-          <Link href={`/edit-task/${task._id}`} className="bg-blue-500 text-white mr-2 rounded p-1">
-            Edit
-          </Link>
-          <button onClick={() => handleDelete(task._id)} className="bg-red-500 text-white rounded p-1">
-            Delete
-          </button>
-        </div>
-      </li>
-    ))
-  ) : (
-    <li className="p-4 mb-2 rounded lg:mx-20 bg-gray-100 text-center">
-      <p className="text-gray-500">
-        {filterStatus === 'all'
-          ? 'No tasks yet, add a task!'
-          : filterStatus === 'pending'
-          ? 'No pending tasks.'
-          : 'No completed tasks.'}
-      </p>
-    </li>
-  )}
-</ul>
+      ) : (
+        /* Task List */
+        <ul>
+          {sortedTasks.length > 0 ? (
+            sortedTasks.map((task) => (
+              <li
+                key={task._id}
+                className={`p-4 mb-2 rounded lg:mx-20 ${
+                  task.status === 'completed' ? 'bg-green-100' : 'bg-yellow-100'
+                }`}
+              >
+                <div className="flex items-center justify-start space-x-5">
+                  <input
+                    type="checkbox"
+                    checked={task.status === 'completed'}
+                    onChange={() => toggleTaskStatus(task)}
+                    className="ml-4 h-5 w-5"
+                  />
+                  <div>
+                    <h2 className="font-bold">{task.title}</h2>
+                    <p>{task.description}</p>
+                    <p>Status: {task.status}</p>
+                    <p className="text-gray-500">{new Date(task.updatedAt).toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className="mt-2 ml-14">
+                  <Link href={`/edit-task/${task._id}`} className="bg-blue-500 text-white mr-2 rounded p-1">
+                    Edit
+                  </Link>
+                  <button onClick={() => handleDelete(task._id)} className="bg-red-500 text-white rounded p-1">
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))
+          ) : (
+            <li className="p-4 mb-2 rounded lg:mx-20 bg-gray-100 text-center">
+              <p className="text-gray-500">
+                {filterStatus === 'all'
+                  ? 'No tasks yet, add a task!'
+                  : filterStatus === 'pending'
+                  ? 'No pending tasks.'
+                  : 'No completed tasks.'}
+              </p>
+            </li>
+          )}
+        </ul>
+      )}
     </div>
   );
 }
