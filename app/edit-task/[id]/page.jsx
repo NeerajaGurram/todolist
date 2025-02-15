@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function EditTask() {
   const [title, setTitle] = useState('');
@@ -9,10 +11,10 @@ export default function EditTask() {
   const [status, setStatus] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const router = useRouter();
   const { id } = useParams();
-  
+
   useEffect(() => {
     if (!id) return;
 
@@ -21,8 +23,8 @@ export default function EditTask() {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/tasks/${id}`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
@@ -37,6 +39,7 @@ export default function EditTask() {
       } catch (err) {
         setError(err.message);
         setLoading(false);
+        toast.error('Failed to fetch task details');
       }
     };
 
@@ -45,27 +48,36 @@ export default function EditTask() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+
+    toast.promise(
+      (async () => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/tasks/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, description, status }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update task');
+        }
+
+        return response.json();
+      })(),
+      {
+        pending: 'Updating task...',
+        success: {
+          render: 'Task updated successfully!',
+          onClose: () => router.push('/home'), // Redirect after success
         },
-        body: JSON.stringify({ title, description, status }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task');
+        error: 'Failed to update task',
       }
-
-      router.push('/home');
-    } catch (error) {
-      console.error('Error updating task:', error);
-      setError(error.message);
-    }
+    );
   };
+
   const handleCancel = () => {
     router.push('/home');
   };
@@ -75,8 +87,21 @@ export default function EditTask() {
 
   return (
     <div className="container mx-auto p-4">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       <h1 className="text-2xl font-bold mb-4 lg:mx-20">Edit Task</h1>
-      <form onSubmit={handleSubmit} className='lg:mx-20'>
+      <form onSubmit={handleSubmit} className="lg:mx-20">
         <input
           type="text"
           placeholder="Title"
@@ -100,13 +125,16 @@ export default function EditTask() {
           <option value="pending">Pending</option>
           <option value="completed">Completed</option>
         </select>
-        <div className='flex space-x-4'>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Update Task
-        </button>
-        <button onClick={handleCancel} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Cancel
-        </button>
+        <div className="flex space-x-4">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            Update Task
+          </button>
+          <button
+            onClick={handleCancel}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
