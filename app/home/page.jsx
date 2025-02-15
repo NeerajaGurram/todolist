@@ -165,7 +165,8 @@ export default function Home() {
         </select>
       </div>
 
-      {/* Task List */}
+   
+{/* Task List */}
 <ul>
   {sortedTasks.length > 0 ? (
     sortedTasks.map((task) => (
@@ -201,7 +202,13 @@ export default function Home() {
     ))
   ) : (
     <li className="p-4 mb-2 rounded lg:mx-20 bg-gray-100 text-center">
-      <p className="text-gray-500">No tasks yet, add a task!</p>
+      <p className="text-gray-500">
+        {filterStatus === 'all'
+          ? 'No tasks yet, add a task!'
+          : filterStatus === 'pending'
+          ? 'No pending tasks.'
+          : 'No completed tasks.'}
+      </p>
     </li>
   )}
 </ul>
