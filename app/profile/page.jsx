@@ -67,7 +67,7 @@ export default function Profile() {
           window.location.reload();
           setTimeout(() => {
             router.push('/home'); // Redirect after the reload
-          }, 100); // Delay redirect slightly to ensure the page reloads first
+          }, 1000); // Delay redirect slightly to ensure the page reloads first
         },
       },
         error: 'Failed to update profile',
