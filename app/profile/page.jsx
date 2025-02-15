@@ -62,7 +62,13 @@ export default function Profile() {
         pending: 'Updating profile...',
         success: {
         render: 'Profile updated successfully!',
-        onClose: () => router.push('/home'), // Redirect after the toast closes
+        onClose: () => {
+          // Reload the page before redirecting
+          window.location.reload();
+          setTimeout(() => {
+            router.push('/home'); // Redirect after the reload
+          }, 100); // Delay redirect slightly to ensure the page reloads first
+        },
       },
         error: 'Failed to update profile',
       }
