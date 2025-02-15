@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify'; // Import the toast functions
+import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,30 +16,39 @@ export default function AuthPage() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    toast.info('Loading...', { autoClose: false }); // Show loading toast
 
     const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/signin';
     const payload = isSignUp
       ? { name, email, password }
       : { email, password };
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.error || 'Authentication failed');
-      return;
-    }
+      if (!response.ok) {
+        setError(data.error || 'Authentication failed');
+        toast.error(data.error || 'Authentication failed');
+        return;
+      }
 
-    if (isSignUp) {
-      setIsSignUp(false); // Redirect to Sign In after signup
-    } else {
-      localStorage.setItem('token', data.token);
-      router.push('/home');
+      if (isSignUp) {
+        setIsSignUp(false); // Redirect to Sign In after signup
+        toast.success('Signup successful! Please sign in.', { autoClose: 3000 });
+      } else {
+        localStorage.setItem('token', data.token);
+        toast.success('Signed in successfully!', { autoClose: 3000 });
+        router.push('/home');
+      }
+    } catch (err) {
+      setError('An error occurred.');
+      toast.error('An error occurred, please try again!');
     }
   };
 
@@ -87,6 +98,9 @@ export default function AuthPage() {
           {isSignUp ? 'Sign In' : 'Sign Up'}
         </button>
       </p>
+
+      
+      <ToastContainer />
     </div>
   );
 }
