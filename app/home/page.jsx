@@ -166,40 +166,45 @@ export default function Home() {
       </div>
 
       {/* Task List */}
-      <ul>
-        {sortedTasks.map((task) => (
-          <li
-            key={task._id}
-            className={`p-4 mb-2 rounded lg:mx-20 ${
-              task.status === 'completed' ? 'bg-green-100' : 'bg-yellow-100'
-            }`}
-          >
-            <div className="flex items-center justify-start space-x-5">
-            <input
-                type="checkbox"
-                checked={task.status === 'completed'}
-                onChange={() => toggleTaskStatus(task)}
-                className="ml-4 h-5 w-5"
-              />
-              <div>
-                <h2 className="font-bold">{task.title}</h2>
-                <p>{task.description}</p>
-                <p>Status: {task.status}</p>
-                <p className="text-gray-500">{new Date(task.updatedAt).toLocaleString()}</p>
-              </div>
-              
-            </div>
-            <div className="mt-2 ml-14">
-              <Link href={`/edit-task/${task._id}`} className="bg-blue-500 text-white mr-2 rounded p-1">
-                Edit
-              </Link>
-              <button onClick={() => handleDelete(task._id)} className="bg-red-500 text-white rounded p-1">
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+<ul>
+  {sortedTasks.length > 0 ? (
+    sortedTasks.map((task) => (
+      <li
+        key={task._id}
+        className={`p-4 mb-2 rounded lg:mx-20 ${
+          task.status === 'completed' ? 'bg-green-100' : 'bg-yellow-100'
+        }`}
+      >
+        <div className="flex items-center justify-start space-x-5">
+          <input
+            type="checkbox"
+            checked={task.status === 'completed'}
+            onChange={() => toggleTaskStatus(task)}
+            className="ml-4 h-5 w-5"
+          />
+          <div>
+            <h2 className="font-bold">{task.title}</h2>
+            <p>{task.description}</p>
+            <p>Status: {task.status}</p>
+            <p className="text-gray-500">{new Date(task.updatedAt).toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="mt-2 ml-14">
+          <Link href={`/edit-task/${task._id}`} className="bg-blue-500 text-white mr-2 rounded p-1">
+            Edit
+          </Link>
+          <button onClick={() => handleDelete(task._id)} className="bg-red-500 text-white rounded p-1">
+            Delete
+          </button>
+        </div>
+      </li>
+    ))
+  ) : (
+    <li className="p-4 mb-2 rounded lg:mx-20 bg-gray-100 text-center">
+      <p className="text-gray-500">No tasks yet, add a task!</p>
+    </li>
+  )}
+</ul>
     </div>
   );
 }
