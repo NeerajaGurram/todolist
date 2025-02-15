@@ -65,9 +65,7 @@ export default function Profile() {
         onClose: () => {
           // Reload the page before redirecting
           window.location.reload();
-          setTimeout(() => {
-            router.push('/home'); // Redirect after the reload
-          }, 1000); // Delay redirect slightly to ensure the page reloads first
+          
         },
       },
         error: 'Failed to update profile',
