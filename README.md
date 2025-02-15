@@ -1,4 +1,4 @@
-Here’s a comprehensive `README.md` file tailored to your project. It includes instructions for setting up and running the project locally, an overview of the architecture and design decisions, and additional notes for reviewers.
+Here’s a comprehensive `README.md` file tailored to your project. It includes instructions for setting up and running the project locally, an overview of the architecture and design decisions.
 
 ---
 
@@ -15,7 +15,6 @@ This is a full-stack task management application built with Next.js, React, and 
 3. [Setup and Installation](#setup-and-installation)
 4. [Project Architecture](#project-architecture)
 5. [Design Decisions](#design-decisions)
-6. [Additional Notes](#additional-notes)
 
 ---
 
