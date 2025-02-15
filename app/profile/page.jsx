@@ -60,7 +60,10 @@ export default function Profile() {
       })(),
       {
         pending: 'Updating profile...',
-        success: 'Profile updated successfully!',
+        success: {
+        render: 'Profile updated successfully!',
+        onClose: () => router.push('/home'), // Redirect after the toast closes
+      },
         error: 'Failed to update profile',
       }
     );
